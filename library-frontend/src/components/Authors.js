@@ -1,8 +1,47 @@
+import { useState } from 'react'
+import { gql, useMutation } from '@apollo/client'
+import Select from 'react-select';
+
+
+const UPDATE_AGE = gql`
+  mutation UpdateAge($name: String!, $setBornTo: Int!) {
+    editAuthor(
+      name: $name,
+      setBornTo: $setBornTo
+    ) {
+      name,
+      born
+    }
+  }
+`
+
+
+
 const Authors = (props) => {
+ 
+  const authors = props.authors || []
+
+  const [age, setAge] = useState('')
+
+  const [ updateAge ] = useMutation(UPDATE_AGE)
+
+  const [selectedOption, setSelectedOption] = useState(null)
+
+
+  const options = authors.map(author => ({...author, value: author.name, label: author.name}))
+
+
+  const submit = async (event) => {
+    event.preventDefault()
+
+    updateAge({variables: {name: selectedOption.name, setBornTo: parseInt(age)}})
+
+    setAge('')
+  }
+
   if (!props.show) {
     return null
   }
-  const authors = props.authors || []
 
   return (
     <div>
@@ -23,6 +62,25 @@ const Authors = (props) => {
           ))}
         </tbody>
       </table>
+      <hr />
+      <form onSubmit={submit}>
+        <div>
+        <Select
+        defaultValue={selectedOption}
+        onChange={setSelectedOption}
+        options={options}
+      />
+          <br />
+          Born
+          <input
+            value={age}
+            type="number"
+            onChange={({ target }) => setAge(target.value)}
+          />
+        </div>
+ 
+        <button type="submit">update age</button>
+      </form>
     </div>
   )
 }
