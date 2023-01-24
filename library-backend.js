@@ -3,7 +3,7 @@ const { v1: uuid } = require('uuid')
 const mongoose = require('mongoose')
 require('dotenv').config();
 const Book = require('./models/book')
-const Author = require('./models/author')
+const Author = require('./models/author');
 
 const MONGODB_URI = process.env.MONGO_URI
 
@@ -63,13 +63,29 @@ const resolvers = {
     bookCount: async () => Book.collection.countDocuments(),
     authorCount : async () => Author.collection.countDocuments(),
     allBooks: async (root, args) => {
-        return Book.find({})
+      return Book.find({})
     },
     allAuthors: async (root) => {
       return Author.find({})
     }
   },
+  Book: {
+    author: async (root) => {
+      const author = await Author.findById(root.author)
+      const bookCount = (await Book.find({author: {$in: [root.author]}})).length
+      return {
+        name: author.name,
+        born: author.born,
+        bookCount: bookCount
+      }
+    }
+  },
 
+  Author: {
+    bookCount: async (root) => (await Book.find({author: {$in: [root._id]}})).length
+  },
+
+  
 
   Mutation: {
     addBook: async (root, args) => {
