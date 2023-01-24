@@ -49,6 +49,7 @@ const typeDefs = gql`
 
   type User {
     username: String!
+    favouriteGenre: String!
     id: ID!
   }
   
@@ -75,6 +76,7 @@ const typeDefs = gql`
   type Mutation {
     createUser(
       username: String!
+      favouriteGenre: String!
     ): User
     login(
       username: String!
@@ -153,7 +155,7 @@ const resolvers = {
       return author.save()
     },
     createUser: async (root, args) => {
-      const user = new User({ username: args.username })
+      const user = new User({ username: args.username, favouriteGenre: args.favouriteGenre })
   
       return user.save()
         .catch(error => {
