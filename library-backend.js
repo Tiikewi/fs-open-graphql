@@ -1,4 +1,4 @@
-const { ApolloServer, gql } = require('apollo-server')
+const { ApolloServer, gql, UserInputError } = require('apollo-server')
 const { v1: uuid } = require('uuid')
 const mongoose = require('mongoose')
 require('dotenv').config();
@@ -89,8 +89,14 @@ const resolvers = {
 
   Mutation: {
     addBook: async (root, args) => {
+      if (args.title.length < 2) {
+        throw new UserInputError("title too short", {invalidArgs: args.title})
+      }
+      if (args.author.length < 3) {
+        throw new UserInputError("author name too short", {invalidArgs: args.author})
+      }
       let author = await Author.findOne({name: args.author})
-      console.log('author', author)
+
       if(!author) {
         author = new Author({name: args.author, born: null})
         await author.save()
@@ -101,6 +107,10 @@ const resolvers = {
     },
 
     editAuthor: async (root, args) => {
+      const currentYear = new Date().getFullYear()
+      if (args.born < 0 || args.born > currentYear) {
+        throw new UserInputError("Invalid year for author birth", {invalidArgs: args.setBornTo})
+      }
       const author = await Author.findOne({ name: args.name })
       author.born = args.setBornTo
       return author.save()
