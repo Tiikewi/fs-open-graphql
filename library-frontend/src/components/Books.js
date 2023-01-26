@@ -12,6 +12,7 @@ const ALL_BOOKS = gql`
       published
       genres
     }
+    genres
   }
 `
 
@@ -26,19 +27,9 @@ const Books = (props) => {
   const [selectedGenre, setSelectedGenre] = useState("all")
 
   useEffect(() => {
-    if(result.data) {
+    if(result.data && result.data.genres) {
       setBooks(result.data.allBooks)
-      let genres = []
-
-      result.data.allBooks.forEach(book => {
-        book.genres.forEach(genre => {
-          if (!genres.includes()) {
-            genres = genres.concat(genre)
-          }
-        })
-      })
-
-      setGenres(genres)
+      setGenres(result.data.genres)
     }
   }, [result])
 

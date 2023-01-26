@@ -45,6 +45,7 @@ const typeDefs = gql`
     allBooks(author: String, genre: String): [Book!]!
     allAuthors: [Author!]!
     me: User
+    genres: [String]!
   }
 
   type User {
@@ -98,6 +99,18 @@ const resolvers = {
     },
      me: (root, args, context) => {
       return context.currentUser
+     },
+     genres: async (root) => {
+      const books =  await Book.find({})
+      let genres = []
+      books.forEach(book => {
+        book.genres.forEach(genre => {
+          if(!genres.includes(genre)) {
+            genres.push(genre)
+          }
+        })
+      });
+      return genres;
      }
   },
   Book: {
