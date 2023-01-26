@@ -1,9 +1,53 @@
+import { useEffect, useState } from 'react'
+import { gql, useQuery, useApolloClient } from '@apollo/client'
+
+
+const ALL_BOOKS = gql`
+  query {
+    allBooks {
+      title
+      author {
+        name
+      }
+      published
+      genres
+    }
+  }
+`
+
+
 const Books = (props) => {
+  const result = useQuery(ALL_BOOKS, {
+    pollInterval: 2000
+  })
+
+  const [genres, setGenres] = useState([])
+  const [books, setBooks] = useState([])
+  const [selectedGenre, setSelectedGenre] = useState("all")
+
+  useEffect(() => {
+    if(result.data) {
+      setBooks(result.data.allBooks)
+      let genres = []
+
+      result.data.allBooks.forEach(book => {
+        book.genres.forEach(genre => {
+          if (!genres.includes()) {
+            genres = genres.concat(genre)
+          }
+        })
+      })
+
+      setGenres(genres)
+    }
+  }, [result])
+
+
   if (!props.show) {
     return null
-  }
+  } 
 
-  const books = props.books || []
+  
 
   return (
     <div>
@@ -16,15 +60,28 @@ const Books = (props) => {
             <th>author</th>
             <th>published</th>
           </tr>
-          {books.map((a) => (
+          {selectedGenre === "all" ? books.map((a) => (
             <tr key={a.title}>
               <td>{a.title}</td>
               <td>{a.author.name}</td>
               <td>{a.published}</td>
             </tr>
-          ))}
+          )): books.filter(book => book.genres.includes(selectedGenre)).map((a) => (
+            <tr key={a.title}>
+              <td>{a.title}</td>
+              <td>{a.author.name}</td>
+              <td>{a.published}</td>
+            </tr>
+          )) }
         </tbody>
       </table>
+      <div>
+
+      {genres.map(genre => {
+        return <button key={genre} disabled={selectedGenre===genre} onClick={()=> setSelectedGenre(genre)}>{genre}</button>
+      })}
+      <button disabled={selectedGenre==="all"} onClick={()=> setSelectedGenre("all")}>all genres</button>
+      </div>
     </div>
   )
 }

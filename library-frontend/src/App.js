@@ -12,13 +12,6 @@ const ALL_AUTHORS_BOOKS = gql`
       born
       bookCount
     },
-    allBooks {
-      title
-      author {
-        name
-      }
-      published
-    }
   }
 `
 
